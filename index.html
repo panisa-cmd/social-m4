@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบคลังใบงานและส่งการบ้านออนไลน์</title>
+  <title>ระบบคลังใบงานและส่งการบ้านออนไลน์ ม.4</title>
   <!-- Google Fonts: Prompt -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -133,7 +133,7 @@
     <div class="brand">
       <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
       <div class="brand-text">
-        <h2>Smart Student</h2>
+        <h2>Smart Student (ม.4)</h2>
         <p>ระบบคลังใบงาน & ส่งงาน</p>
       </div>
     </div>
@@ -159,7 +159,7 @@
 
   <main class="main-wrapper">
     <div class="top-header">
-      <h1 id="pageTitle">หน้าแรกและบอร์ดประชาสัมพันธ์</h1>
+      <h1 id="pageTitle">หน้าแรกและบอร์ดประชาสัมพันธ์ ม.4</h1>
       <div class="header-actions">
         <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleDarkMode()" title="สลับโหมดมืด/สว่าง">
           <i class="fa-solid fa-moon"></i>
@@ -168,17 +168,19 @@
       </div>
     </div>
 
-    <!-- แถบเช็กข้อมูลรายบุคคล -->
+    <!-- แถบเช็กข้อมูลรายบุคคล (ปรับเป็น ม.4) -->
     <div class="student-filter-bar">
       <div style="font-size: 13px; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 6px;">
         <i class="fa-solid fa-user-check"></i> ตรวจสอบงานของฉัน:
       </div>
       <div class="filter-input-group">
         <select id="filterClassroom" class="filter-select">
-          <option value="ม.2/1">ม.2/1</option>
-          <option value="ม.2/2">ม.2/2</option>
-          <option value="ม.2/3">ม.2/3</option>
-          <option value="ม.2/4">ม.2/4</option>
+          <option value="ม.4/1">ม.4/1</option>
+          <option value="ม.4/2">ม.4/2</option>
+          <option value="ม.4/3">ม.4/3</option>
+          <option value="ม.4/4">ม.4/4</option>
+          <option value="ม.4/5">ม.4/5</option>
+          <option value="ม.4/6">ม.4/6</option>
         </select>
         <input type="number" id="filterStudentNo" class="filter-input" placeholder="เลขที่ (เช่น 17)" min="1" max="60" style="width: 110px;">
         <button type="button" class="btn-action-primary" onclick="checkStudentStatus()">
@@ -189,7 +191,7 @@
 
     <div id="dashboardSection">
       <div class="hero-banner">
-        <h2>ยินดีต้อนรับสู่ คลังการเรียนรู้และส่งงาน</h2>
+        <h2>ยินดีต้อนรับสู่ คลังการเรียนรู้และส่งงาน ม.4</h2>
         <p>เข้าถึงใบงาน ดาวน์โหลดเอกสาร ทำแบบฝึกหัดออนไลน์ และส่งงานกลับเข้าสู่ระบบได้อย่างสะดวก รวดเร็ว และเป็นระเบียบ</p>
       </div>
 
@@ -220,7 +222,7 @@
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
       <h3 style="font-size: 16px; font-weight: 600; color: var(--text-main);" id="sectionListHeading">
-        <i class="fa-solid fa-folder-open" style="color: var(--primary);"></i> รายการใบงานประจำวิชา
+        <i class="fa-solid fa-folder-open" style="color: var(--primary);"></i> รายการใบงานประจำวิชา ม.4
       </h3>
       <input type="text" id="searchInput" class="filter-input" placeholder="🔍 ค้นหาใบงาน..." oninput="filterAssignments()" style="display: none;">
     </div>
@@ -281,10 +283,9 @@
               <div class="form-group" style="margin-bottom:0;">
                 <label>ห้องเรียน *</label>
                 <select id="formClassroom" class="form-control" required>
-                  <option value="ม.2/1">ม.2/1</option>
-                  <option value="ม.2/2">ม.2/2</option>
-                  <option value="ม.2/3">ม.2/3</option>
-                  <option value="ม.2/4">ม.2/4</option>
+                  <option value="ม.4/2">ม.4/2</option>
+                  <option value="ม.4/3">ม.4/3</option>
+                  <option value="ม.4/4">ม.4/4</option>
                 </select>
               </div>
               <div class="form-group" style="margin-bottom:0;">
@@ -295,7 +296,7 @@
 
             <div class="form-group">
               <label>ชื่อ-นามสกุล *</label>
-              <input type="text" id="formStudentName" class="form-control" placeholder="ด.ช.มานะ รักเรียน" required>
+              <input type="text" id="formStudentName" class="form-control" placeholder="ด.ช./นาย..." required>
             </div>
 
             <div class="form-group">
@@ -320,7 +321,7 @@
   <div class="notice-toast" id="toastMsg"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i><span id="toastText">บันทึกเรียบร้อย</span></div>
 
   <script>
-    // ✅ URL เว็บแอปของคุณครูถูกใส่ไว้ให้เรียบร้อยแล้ว ห้ามเปลี่ยนนะครับ
+    // ✅ URL เว็บแอปสำหรับ ม.4 ตัวใหม่ของคุณครู
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz8AX2SIcgmZ5KA1RS9UP4CP8c_XqvY86QDD9uWCSP4Uh-Wd7G64Ysu9Abk4AsVYyo/exec";
 
     let assignments = [];
@@ -349,7 +350,7 @@
     }
 
     function initTheme() {
-      const savedTheme = localStorage.getItem('smart_student_theme');
+      const savedTheme = localStorage.getItem('smart_student_theme_m4');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
         document.getElementById('themeToggleBtn').innerHTML = '<i class="fa-solid fa-sun" style="color:#fbbf24;"></i>';
@@ -361,10 +362,10 @@
       const btn = document.getElementById('themeToggleBtn');
       if (isDark) {
         btn.innerHTML = '<i class="fa-solid fa-sun" style="color:#fbbf24;"></i>';
-        localStorage.setItem('smart_student_theme', 'dark');
+        localStorage.setItem('smart_student_theme_m4', 'dark');
       } else {
         btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-        localStorage.setItem('smart_student_theme', 'light');
+        localStorage.setItem('smart_student_theme_m4', 'light');
       }
     }
 
@@ -378,11 +379,11 @@
       if (view === 'dashboard') {
         menuHome.classList.add('active'); menuAssign.classList.remove('active');
         dashSection.style.display = 'block'; searchInput.style.display = 'none';
-        heading.innerText = 'หน้าแรกและบอร์ดประชาสัมพันธ์';
+        heading.innerText = 'หน้าแรกและบอร์ดประชาสัมพันธ์ ม.4';
       } else {
         menuHome.classList.remove('active'); menuAssign.classList.add('active');
         dashSection.style.display = 'none'; searchInput.style.display = 'block';
-        heading.innerText = 'รับใบงาน & ทำแบบทดสอบ';
+        heading.innerText = 'รับใบงาน & ทำแบบทดสอบ ม.4';
       }
       renderCards(assignments);
     }
@@ -390,7 +391,7 @@
     function openDirectSubmit() {
       if (assignments.length === 0) { showToast('ยังไม่มีรายการใบงานในระบบ', true); return; }
       document.getElementById('modalInfoSection').style.display = 'none';
-      document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> ส่งการบ้านออนไลน์';
+      document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> ส่งการบ้านออนไลน์ ม.4';
       populateAssignmentDropdown('');
       document.getElementById('workModal').style.display = 'flex';
     }
