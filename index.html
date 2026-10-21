@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบคลังใบงานและส่งการบ้านออนไลน์</title>
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-light: #10b981;
+      --primary-subtle: #ecfdf5;
+      --primary-dark: #047857;
+      --bg-page: #f8fafc;
+      --card-bg: #ffffff;
+      --sidebar-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --badge-box-bg: #f8fafc;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(5, 150, 105, 0.08);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode {
+      --bg-page: #0f172a;
+      --card-bg: #1e293b;
+      --sidebar-bg: #1e293b;
+      --border-color: #334155;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --input-bg: #0f172a;
+      --badge-box-bg: #0f172a;
+      --primary-subtle: rgba(5, 150, 105, 0.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
+    body { background: var(--bg-page); min-height: 100vh; color: var(--text-main); display: flex; }
+
+    .sidebar { width: 250px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 24px 16px; flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-left: 6px; }
+    .brand-icon { width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 19px; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25); }
+    .brand-text h2 { font-size: 16px; font-weight: 700; color: var(--primary); line-height: 1.2; }
+    .brand-text p { font-size: 11px; color: var(--text-muted); }
+    .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
+    .nav-item button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 16px; border: none; background: transparent; border-radius: var(--radius-sm); color: var(--text-muted); font-size: 13.5px; cursor: pointer; font-weight: 500; text-align: left; transition: all 0.2s; }
+    .nav-item.active button, .nav-item button:hover { background: var(--primary-subtle); color: var(--primary-light); font-weight: 600; }
+
+    .main-wrapper { flex-grow: 1; padding: 24px 32px; overflow-y: auto; max-height: 100vh; }
+    .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .top-header h1 { font-size: 20px; font-weight: 700; color: var(--text-main); }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .theme-toggle-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s; }
+    .theme-toggle-btn:hover { color: var(--primary); border-color: var(--primary); transform: scale(1.05); }
+
+    .hero-banner { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: var(--radius-lg); min-height: 140px; padding: 28px 32px; color: #ffffff; position: relative; overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: 22px; display: flex; flex-direction: column; justify-content: center; }
+    .hero-banner::after { content: '\f19d'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 32px; top: 50%; transform: translateY(-50%); font-size: 110px; opacity: 0.18; }
+    .hero-banner h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .hero-banner p { font-size: 13px; opacity: 0.95; max-width: 600px; line-height: 1.6; }
+
+    .student-filter-bar { background: var(--card-bg); padding: 12px 18px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px; margin-bottom: 22px; border: 1px solid var(--border-color); flex-wrap: wrap; }
+    .filter-input-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-select, .filter-input { padding: 7px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 13px; outline: none; background: var(--input-bg); color: var(--text-main); }
+    .filter-select:focus, .filter-input:focus { border-color: var(--primary); }
+    .btn-action-primary { background: var(--primary); color: #fff; border: none; padding: 7px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
+    .btn-action-primary:hover { background: var(--primary-dark); }
+
+    .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 22px; }
+    .stat-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); }
+    .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .stat-icon.green { background: #d1fae5; color: #059669; }
+    .stat-icon.yellow { background: #fef3c7; color: #d97706; }
+    .stat-icon.purple { background: #ede9fe; color: #7c3aed; }
+    .stat-info p { font-size: 11.5px; color: var(--text-muted); margin-bottom: 2px; }
+    .stat-info h3 { font-size: 20px; font-weight: 700; color: var(--text-main); }
+
+    .steps-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 22px 24px; margin-bottom: 26px; box-shadow: var(--shadow-sm); }
+    .steps-card-title { font-size: 15px; font-weight: 700; color: var(--primary-light); display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+    .step-item { display: flex; flex-direction: column; gap: 8px; }
+    .step-num-badge { width: 28px; height: 28px; border-radius: 50%; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+    .step-item h4 { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .step-item p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+    .work-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--primary); transition: transform 0.2s, box-shadow 0.2s; }
+    .work-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .category-tag { background: var(--primary-subtle); color: var(--primary-light); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: 500; }
+    .status-badge.pending { background: #fef2f2; color: #ef4444; }
+    .status-badge.submitted { background: #ecfdf5; color: #059669; }
+    .status-badge.graded { background: #f3e8ff; color: #7c3aed; }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+    .card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+    .card-meta { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; border-top: 1px dashed var(--border-color); padding-top: 10px; align-items: center; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 999; padding: 16px; }
+    .modal-box { background: var(--card-bg); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-lg); position: relative; border: 1px solid var(--border-color); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-header h3 { font-size: 16px; font-weight: 600; color: var(--text-main); }
+    .close-btn { background: var(--badge-box-bg); border: 1px solid var(--border-color); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: var(--text-muted); font-size: 14px; }
+    .btn { flex: 1; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; text-decoration: none; text-align: center; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; }
+    .btn-download { background: #dbeafe; color: #1e40af; }
+    .btn-online { background: #fef3c7; color: #b45309; }
+    .btn-submit { background: var(--primary); color: #fff; }
+    .btn-submit:hover { background: var(--primary-dark); }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+    .form-control { width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 13px; outline: none; background: var(--input-bg); color: var(--text-main); }
+    .form-control:focus { border-color: var(--primary); }
+    .notice-toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 18px; border-radius: var(--radius-sm); background: #1e293b; color: #fff; font-size: 13px; display: none; align-items: center; gap: 10px; box-shadow: var(--shadow-lg); z-index: 10000; }
+
+    @media (max-width: 820px) { body { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); } .main-wrapper { padding: 16px; } .stats-container, .steps-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <div class="brand-text">
+        <h2>Smart Student</h2>
+        <p>ระบบคลังใบงาน & ส่งงาน</p>
+      </div>
+    </div>
+
+    <ul class="nav-menu">
+      <li class="nav-item active" id="menuHome">
+        <button onclick="switchView('dashboard')">
+          <i class="fa-solid fa-house"></i> หน้าแรก & แดชบอร์ด
+        </button>
+      </li>
+      <li class="nav-item" id="menuAssignments">
+        <button onclick="switchView('assignments')">
+          <i class="fa-solid fa-book-open"></i> รับใบงาน & ทำแบบทดสอบ
+        </button>
+      </li>
+      <li class="nav-item" id="menuSubmitOnly">
+        <button onclick="openDirectSubmit()">
+          <i class="fa-solid fa-paper-plane"></i> ส่งการบ้านออนไลน์
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="main-wrapper">
+    <div class="top-header">
+      <h1 id="pageTitle">หน้าแรกและบอร์ดประชาสัมพันธ์</h1>
+      <div class="header-actions">
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleDarkMode()" title="สลับโหมดมืด/สว่าง">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <span style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-clock"></i> ภาคเรียนปัจจุบัน</span>
+      </div>
+    </div>
+
+    <!-- แถบเช็กข้อมูลรายบุคคล -->
+    <div class="student-filter-bar">
+      <div style="font-size: 13px; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-user-check"></i> ตรวจสอบงานของฉัน:
+      </div>
+      <div class="filter-input-group">
+        <select id="filterClassroom" class="filter-select">
+          <option value="ม.2/1">ม.2/1</option>
+          <option value="ม.2/2">ม.2/2</option>
+          <option value="ม.2/3">ม.2/3</option>
+          <option value="ม.2/4">ม.2/4</option>
+        </select>
+        <input type="number" id="filterStudentNo" class="filter-input" placeholder="เลขที่ (เช่น 17)" min="1" max="60" style="width: 110px;">
+        <button type="button" class="btn-action-primary" onclick="checkStudentStatus()">
+          <i class="fa-solid fa-magnifying-glass"></i> เช็กสถานะ
+        </button>
+      </div>
+    </div>
+
+    <div id="dashboardSection">
+      <div class="hero-banner">
+        <h2>ยินดีต้อนรับสู่ คลังการเรียนรู้และส่งงาน</h2>
+        <p>เข้าถึงใบงาน ดาวน์โหลดเอกสาร ทำแบบฝึกหัดออนไลน์ และส่งงานกลับเข้าสู่ระบบได้อย่างสะดวก รวดเร็ว และเป็นระเบียบ</p>
+      </div>
+
+      <div class="stats-container">
+        <div class="stat-box">
+          <div class="stat-icon green"><i class="fa-solid fa-file-pen"></i></div>
+          <div class="stat-info"><p>ใบงานรอให้นักเรียนทำ</p><h3 id="statTotal">กำลังโหลด...</h3></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon yellow"><i class="fa-solid fa-circle-question"></i></div>
+          <div class="stat-info"><p>แบบทดสอบ / ข้อสอบออนไลน์</p><h3 id="statOnline">กำลังโหลด...</h3></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon purple"><i class="fa-solid fa-book-bookmark"></i></div>
+          <div class="stat-info"><p>ใบงานที่ส่งแล้ว / มีคะแนน</p><h3 id="statSubmitted">0 ชิ้น</h3></div>
+        </div>
+      </div>
+
+      <div class="steps-card">
+        <div class="steps-card-title"><i class="fa-solid fa-bullhorn"></i> ขั้นตอนการดาวน์โหลดและส่งการบ้านในระบบ</div>
+        <div class="steps-grid">
+          <div class="step-item"><div class="step-num-badge">1</div><h4>ค้นหาใบงาน</h4><p>เข้าไปที่เมนู "รับใบงาน" ค้นหาหรือระบุชื่อวิชา/เนื้อหาที่ต้องการศึกษา จากนั้นกดปุ่มแว่นตาเพื่อเปิดดูรายละเอียด</p></div>
+          <div class="step-item"><div class="step-num-badge">2</div><h4>ดาวน์โหลดและสแกน</h4><p>กดดาวน์โหลดไฟล์ผ่านระบบ หรือสแกน QR Code ด้วยโทรศัพท์มือถือ เพื่อเข้าทำแบบทดสอบหรือทำงานบนหน้าจอของนักเรียน</p></div>
+          <div class="step-item"><div class="step-num-badge">3</div><h4>ส่งการบ้านกลับ</h4><p>เมื่อทำใบงานเสร็จแล้ว ให้บันทึกเป็นรูปภาพ/PDF หรือคัดลอกลิงก์งาน แล้วนำมาส่งที่เมนู "ส่งการบ้านออนไลน์" เพื่อให้ครูตรวจประเมิน</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 style="font-size: 16px; font-weight: 600; color: var(--text-main);" id="sectionListHeading">
+        <i class="fa-solid fa-folder-open" style="color: var(--primary);"></i> รายการใบงานประจำวิชา
+      </h3>
+      <input type="text" id="searchInput" class="filter-input" placeholder="🔍 ค้นหาใบงาน..." oninput="filterAssignments()" style="display: none;">
+    </div>
+
+    <div class="cards-grid" id="assignmentsList">
+      <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+        <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+        <p style="margin-top: 10px;">กำลังเชื่อมต่อฐานข้อมูล...</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="workModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTitle"><i class="fa-solid fa-file-pen" style="color: var(--primary);"></i> รายละเอียดใบงาน</h3>
+        <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div id="modalInfoSection">
+          <div style="background: var(--badge-box-bg); padding: 14px; border-radius: var(--radius-sm); font-size: 13px; border: 1px solid var(--border-color); margin-bottom: 12px;">
+            <p><strong>หมวดหมู่:</strong> <span id="modalCategory">-</span></p>
+            <p style="margin-top: 4px;"><strong>กำหนดส่ง:</strong> <span id="modalDueDate" style="color: #ef4444;">-</span></p>
+            <p style="margin-top: 4px;"><strong>คำชี้แจง:</strong> <span id="modalDesc">-</span></p>
+          </div>
+
+          <div id="modalHistory" style="display:none; background:var(--primary-subtle); border:1px solid var(--primary-light); padding:10px 14px; border-radius:var(--radius-sm); font-size:12px; color:var(--primary-light); margin-bottom: 12px;">
+            <i class="fa-solid fa-circle-check"></i> คุณส่งงานชิ้นนี้แล้ว <span id="modalHistoryDetail"></span>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <a href="#" target="_blank" id="btnDownload" class="btn btn-download"><i class="fa-solid fa-download"></i> ดาวน์โหลดใบงาน (PDF)</a>
+            <a href="#" target="_blank" id="btnOnline" class="btn btn-online"><i class="fa-solid fa-gamepad"></i> เข้าทำออนไลน์ / เล่นเกม</a>
+          </div>
+
+          <div style="display: flex; flex-direction: column; align-items: center; padding: 10px; background: var(--badge-box-bg); border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div id="qrcodeBox" style="background:#fff; padding:6px; border-radius:6px;"></div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;"><i class="fa-solid fa-qrcode"></i> สแกนเพื่อเปิดทำบนมือถือ</p>
+          </div>
+        </div>
+
+        <div style="border-top: 1px dashed var(--border-color); padding-top: 14px;">
+          <h4 style="font-size: 13.5px; margin-bottom: 10px; color: var(--primary);"><i class="fa-solid fa-cloud-arrow-up"></i> แบบฟอร์มส่งงาน</h4>
+          <form id="submitForm" onsubmit="handleSendWork(event)">
+            
+            <div class="form-group" id="assignmentSelectGroup">
+              <label>เลือกใบงานที่ต้องการส่ง *</label>
+              <select id="formAssignSelect" class="form-control" onchange="onAssignSelectChanged()" required>
+                <option value="">-- กรุณาเลือกใบงาน --</option>
+              </select>
+            </div>
+
+            <input type="hidden" id="formAssignId">
+            <input type="hidden" id="formAssignTitle">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>ห้องเรียน *</label>
+                <select id="formClassroom" class="form-control" required>
+                  <option value="ม.2/1">ม.2/1</option>
+                  <option value="ม.2/2">ม.2/2</option>
+                  <option value="ม.2/3">ม.2/3</option>
+                  <option value="ม.2/4">ม.2/4</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>เลขที่ *</label>
+                <input type="number" id="formStudentNo" class="form-control" placeholder="เช่น 17" min="1" max="60" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>ชื่อ-นามสกุล *</label>
+              <input type="text" id="formStudentName" class="form-control" placeholder="ด.ช.มานะ รักเรียน" required>
+            </div>
+
+            <div class="form-group">
+              <label>แนบไฟล์งาน (รูปถ่ายสมุด / PDF)</label>
+              <input type="file" id="formFile" class="form-control" accept="image/*,.pdf,.doc,.docx">
+            </div>
+
+            <div class="form-group">
+              <label>หรือแนบลิงก์งาน (Canva / Google Docs)</label>
+              <input type="url" id="formLink" class="form-control" placeholder="https://...">
+            </div>
+
+            <button type="submit" id="btnSubmitForm" class="btn btn-submit" style="width: 100%;">
+              <i class="fa-solid fa-paper-plane"></i> ยืนยันการส่งการบ้าน
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice-toast" id="toastMsg"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i><span id="toastText">บันทึกเรียบร้อย</span></div>
+
+  <script>
+    // ✅ URL เว็บแอปของคุณครูถูกใส่ไว้ให้เรียบร้อยแล้ว ห้ามเปลี่ยนนะครับ
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz8AX2SIcgmZ5KA1RS9UP4CP8c_XqvY86QDD9uWCSP4Uh-Wd7G64Ysu9Abk4AsVYyo/exec";
+
+    let assignments = [];
+    let studentData = { room: '', no: '', submissions: {} };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      loadAllInitialData();
+    });
+
+    async function loadAllInitialData() {
+      try {
+        const res = await fetch(`${GAS_WEB_APP_URL}?action=getAssignments`);
+        const json = await res.json();
+        if (json.status === 'success') {
+          assignments = json.data || [];
+          calcStatsOverview(assignments);
+          renderCards(assignments);
+          populateAssignmentDropdown('');
+        } else {
+          throw new Error(json.message);
+        }
+      } catch (err) {
+        document.getElementById('assignmentsList').innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 30px;">ไม่สามารถดึงข้อมูลใบงานได้: ${escapeHtml(err.message)}</p>`;
+      }
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('smart_student_theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeToggleBtn').innerHTML = '<i class="fa-solid fa-sun" style="color:#fbbf24;"></i>';
+      }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      const btn = document.getElementById('themeToggleBtn');
+      if (isDark) {
+        btn.innerHTML = '<i class="fa-solid fa-sun" style="color:#fbbf24;"></i>';
+        localStorage.setItem('smart_student_theme', 'dark');
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        localStorage.setItem('smart_student_theme', 'light');
+      }
+    }
+
+    function switchView(view) {
+      const menuHome = document.getElementById('menuHome');
+      const menuAssign = document.getElementById('menuAssignments');
+      const dashSection = document.getElementById('dashboardSection');
+      const searchInput = document.getElementById('searchInput');
+      const heading = document.getElementById('pageTitle');
+
+      if (view === 'dashboard') {
+        menuHome.classList.add('active'); menuAssign.classList.remove('active');
+        dashSection.style.display = 'block'; searchInput.style.display = 'none';
+        heading.innerText = 'หน้าแรกและบอร์ดประชาสัมพันธ์';
+      } else {
+        menuHome.classList.remove('active'); menuAssign.classList.add('active');
+        dashSection.style.display = 'none'; searchInput.style.display = 'block';
+        heading.innerText = 'รับใบงาน & ทำแบบทดสอบ';
+      }
+      renderCards(assignments);
+    }
+
+    function openDirectSubmit() {
+      if (assignments.length === 0) { showToast('ยังไม่มีรายการใบงานในระบบ', true); return; }
+      document.getElementById('modalInfoSection').style.display = 'none';
+      document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> ส่งการบ้านออนไลน์';
+      populateAssignmentDropdown('');
+      document.getElementById('workModal').style.display = 'flex';
+    }
+
+    function populateAssignmentDropdown(selectedId = '') {
+      const select = document.getElementById('formAssignSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">-- กรุณาเลือกใบงานที่ต้องการส่ง --</option>';
+
+      assignments.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = `${item.title} (${item.category})`;
+        if (String(item.id) === String(selectedId)) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      if (selectedId) {
+        const found = assignments.find(a => String(a.id) === String(selectedId));
+        if (found) {
+          document.getElementById('formAssignId').value = found.id;
+          document.getElementById('formAssignTitle').value = found.title;
+        }
+      }
+    }
+
+    function onAssignSelectChanged() {
+      const select = document.getElementById('formAssignSelect');
+      const found = assignments.find(a => String(a.id) === String(select.value));
+      if (found) {
+        document.getElementById('formAssignId').value = found.id;
+        document.getElementById('formAssignTitle').value = found.title;
+      } else {
+        document.getElementById('formAssignId').value = '';
+        document.getElementById('formAssignTitle').value = '';
+      }
+    }
+
+    async function checkStudentStatus() {
+      const room = document.getElementById('filterClassroom').value;
+      const no = document.getElementById('filterStudentNo').value.trim();
+      if (!no) { showToast('กรุณากรอกเลขที่ครับ', true); return; }
+      
+      studentData.room = room; studentData.no = no;
+      document.getElementById('formClassroom').value = room;
+      document.getElementById('formStudentNo').value = no;
+
+      showToast(`กำลังตรวจสอบข้อมูลของ ${room} เลขที่ ${no}...`);
+
+      try {
+        const url = `${GAS_WEB_APP_URL}?action=getStats&classroom=${encodeURIComponent(room)}&studentNo=${encodeURIComponent(no)}`;
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (json.status === 'success') {
+          const stats = json.data;
+          studentData.submissions = stats.submissions || {};
+          document.getElementById('statSubmitted').innerText = `${stats.submitted} ชิ้น`;
+          renderCards(assignments);
+          showToast(`โหลดสถานะของเลขที่ ${no} เรียบร้อยแล้ว`);
+        } else {
+          showToast('เช็กสถานะไม่สำเร็จ: ' + json.message, true);
+        }
+      } catch (err) {
+        showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + err.message, true);
+      }
+    }
+
+    function calcStatsOverview(data) {
+      document.getElementById('statTotal').innerText = `${data.length} ใบงาน`;
+      const onlineCount = data.filter(d => d.onlineWorkUrl && d.onlineWorkUrl.trim() !== '').length;
+      document.getElementById('statOnline').innerText = `${onlineCount} ชุด`;
+    }
+
+    function renderCards(items) {
+      const box = document.getElementById('assignmentsList');
+      if (!items || items.length === 0) {
+        box.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 30px;">ไม่พบรายการใบงาน</p>';
+        return;
+      }
+
+      box.innerHTML = items.map((item, idx) => {
+        let badge = '';
+        const sub = studentData.submissions[String(item.id)];
+        if (studentData.no) {
+          if (sub && sub.score !== '') {
+            badge = `<span class="status-badge graded"><i class="fa-solid fa-award"></i> ตรวจแล้ว: ${escapeHtml(sub.score)} คะแนน</span>`;
+          } else if (sub) {
+            badge = `<span class="status-badge submitted"><i class="fa-solid fa-check"></i> ส่งแล้ว</span>`;
+          } else {
+            badge = `<span class="status-badge pending"><i class="fa-solid fa-hourglass-half"></i> ยังไม่ส่ง</span>`;
+          }
+        }
+
+        return `
+          <div class="work-card">
+            <div>
+              <div class="card-top">
+                <span class="category-tag">${escapeHtml(item.category)}</span>
+                <div>
+                  ${badge}
+                  <button onclick="openModal(${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; margin-left:6px;" title="ดูรายละเอียด">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <h3 class="card-title">${escapeHtml(item.title)}</h3>
+              <p class="card-desc">${escapeHtml(item.description || 'ไม่มีคำชี้แจงเพิ่มเติม')}</p>
+            </div>
+            <div class="card-meta">
+              <span><i class="fa-regular fa-calendar"></i> กำหนด: ${escapeHtml(item.dueDate)}</span>
+              <span style="color:var(--primary); font-weight:600; cursor:pointer;" onclick="openModal(${idx})">
+                เปิดดู <i class="fa-solid fa-arrow-right"></i>
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openModal(idx) {
+      const item = assignments[idx];
+      if (!item) return;
+
+      document.getElementById('modalInfoSection').style.display = 'block';
+      document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-file-pen" style="color: var(--primary);"></i> ${escapeHtml(item.title)}`;
+      document.getElementById('modalCategory').innerText = item.category;
+      document.getElementById('modalDueDate').innerText = item.dueDate;
+      document.getElementById('modalDesc').innerText = item.description || '-';
+
+      const btnDown = document.getElementById('btnDownload');
+      if (item.downloadUrl && item.downloadUrl.trim() !== '') {
+        btnDown.href = item.downloadUrl; btnDown.style.display = 'inline-flex';
+      } else { btnDown.style.display = 'none'; }
+
+      const btnOn = document.getElementById('btnOnline');
+      if (item.onlineWorkUrl && item.onlineWorkUrl.trim() !== '') {
+        btnOn.href = item.onlineWorkUrl; btnOn.style.display = 'inline-flex';
+      } else { btnOn.style.display = 'none'; }
+
+      const historyBox = document.getElementById('modalHistory');
+      const sub = studentData.submissions[String(item.id)];
+      if (sub) {
+        historyBox.style.display = 'block';
+        document.getElementById('modalHistoryDetail').innerText = sub.score !== '' ? `(ได้ ${sub.score} คะแนน)` : '(รอครูตรวจ)';
+      } else {
+        historyBox.style.display = 'none';
+      }
+
+      populateAssignmentDropdown(item.id);
+
+      let qr = item.onlineWorkUrl || item.downloadUrl || window.location.href;
+      const qrBox = document.getElementById('qrcodeBox');
+      qrBox.innerHTML = '';
+      new QRCode(qrBox, { text: qr, width: 105, height: 105 });
+
+      document.getElementById('workModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('workModal').style.display = 'none';
+      document.getElementById('formFile').value = '';
+      document.getElementById('formLink').value = '';
+    }
+
+    function handleSendWork(e) {
+      e.preventDefault();
+      const assignId = document.getElementById('formAssignId').value;
+      if (!assignId) { showToast('กรุณาเลือกใบงานที่ต้องการส่งก่อนครับ', true); return; }
+
+      const btn = document.getElementById('btnSubmitForm');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังส่งงาน...';
+
+      const fileInput = document.getElementById('formFile');
+      const payload = {
+        action: 'submitAssignment',
+        classroom: document.getElementById('formClassroom').value,
+        studentNo: document.getElementById('formStudentNo').value,
+        studentName: document.getElementById('formStudentName').value,
+        assignmentId: document.getElementById('formAssignId').value,
+        assignmentTitle: document.getElementById('formAssignTitle').value,
+        workLink: document.getElementById('formLink').value,
+        fileName: '', fileData: ''
+      };
+
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = ev => { payload.fileName = file.name; payload.fileData = ev.target.result; uploadPayload(payload); };
+        reader.readAsDataURL(file);
+      } else {
+        uploadPayload(payload);
+      }
+    }
+
+    async function uploadPayload(payload) {
+      const btn = document.getElementById('btnSubmitForm');
+      try {
+        const res = await fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+
+        if (json.status === 'success') {
+          showToast(json.message); closeModal(); checkStudentStatus();
+        } else {
+          showToast('เกิดข้อผิดพลาด: ' + json.message, true);
+        }
+      } catch (err) {
+        showToast('ส่งข้อมูลไม่สำเร็จ: ' + err.message, true);
+      } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ยืนยันการส่งการบ้าน';
+      }
+    }
+
+    function showToast(txt, isErr = false) {
+      const t = document.getElementById('toastMsg');
+      t.style.background = isErr ? '#ef4444' : '#065f46';
+      document.getElementById('toastText').innerText = txt;
+      t.style.display = 'flex';
+      setTimeout(() => { t.style.display = 'none'; }, 3500);
+    }
+
+    function filterAssignments() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      renderCards(assignments.filter(i => (i.title && i.title.toLowerCase().includes(q)) || (i.category && i.category.toLowerCase().includes(q))));
+    }
+
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+  </script>
+</body>
+</html>
